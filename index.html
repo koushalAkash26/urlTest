@@ -1,8 +1,30 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <title>URL Shortener</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        margin-top: 50px;
+      }
+      input {
+        padding: 10px;
+        width: 300px;
+        font-size: 16px;
+      }
+      button {
+        padding: 10px 20px;
+        font-size: 16px;
+        margin-left: 10px;
+      }
+      #result {
+        margin-top: 20px;
+        font-size: 18px;
+        color: green;
+      }
+    </style>
   </head>
   <body>
     <h1>URL Shortener</h1>
@@ -13,19 +35,21 @@
     <p id="result"></p>
 
     <script>
-      const apiUrl = "https://jztu3lv469.execute-api.us-east-1.amazonaws.com/prod"; // Replace if your stage is different
+      const apiUrl = "https://jztu3lv469.execute-api.us-east-1.amazonaws.com/prod"; // Replace if needed
 
-      document.getElementById('urlForm').addEventListener('submit', async function(e) {
+      document.getElementById("urlForm").addEventListener("submit", async function (e) {
         e.preventDefault();
-        const url = document.getElementById('urlInput').value;
-        const resultElement = document.getElementById('result');
-        resultElement.textContent = "Loading...";
+        const url = document.getElementById("urlInput").value;
+        const resultElement = document.getElementById("result");
+        resultElement.textContent = "Generating short URL...";
 
         try {
           const response = await fetch(apiUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ url })
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ url: url }),
           });
 
           const data = await response.json();
@@ -33,8 +57,8 @@
           if (response.ok && data.short_url) {
             resultElement.innerHTML = `<strong>Short URL:</strong> <a href="${data.short_url}" target="_blank">${data.short_url}</a>`;
           } else {
-            console.error("Invalid response:", data);
-            resultElement.textContent = "Error: " + (data.message || "Something went wrong.");
+            console.error("Invalid response structure:", data);
+            resultElement.textContent = "Error: Invalid response from server.";
           }
         } catch (error) {
           console.error("Fetch error:", error);
