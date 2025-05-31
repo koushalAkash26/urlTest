@@ -1,80 +1,46 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <meta charset="UTF-8">
-  <title>URL Shortener</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 500px;
-      margin: 50px auto;
-      padding: 20px;
-      border: 1px solid #ccc;
-      border-radius: 12px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-    input[type="text"] {
-      width: 100%;
-      padding: 10px;
-      margin: 10px 0;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-    }
-    button {
-      padding: 10px 15px;
-      background-color: #007BFF;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #0056b3;
-    }
-    #result {
-      margin-top: 20px;
-      font-weight: bold;
-    }
-  </style>
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8">
+    <title>URL Shortener</title>
+  </head>
+  <body>
+    <h1>URL Shortener</h1>
+    <form id="urlForm">
+      <input type="text" id="urlInput" placeholder="Enter a URL" required />
+      <button type="submit">Shorten</button>
+    </form>
+    <p id="result"></p>
 
-  <h2>Shorten a URL</h2>
-  <input type="text" id="urlInput" placeholder="Enter a long URL...">
-  <button onclick="shorten()">Shorten</button>
-  <div id="result"></div>
+    <script>
+      const apiUrl = "https://jztu3lv469.execute-api.us-east-1.amazonaws.com/prod"; // Replace if your stage is different
 
-  <script>
-     async function shorten() {
-  const url = document.getElementById("urlInput").value;
-  const resultEl = document.getElementById("result");
-  resultEl.innerText = "Processing...";
+      document.getElementById('urlForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const url = document.getElementById('urlInput').value;
+        const resultElement = document.getElementById('result');
+        resultElement.textContent = "Loading...";
 
-  try {
-    const response = await fetch("https://jztu3lv469.execute-api.us-east-1.amazonaws.com/prod/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ url })
-    });
+        try {
+          const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url })
+          });
 
-    const responseText = await response.text();  // Get raw text
-    const parsed = JSON.parse(responseText);     // Should be { body: '{ "short_url": ... }' }
+          const data = await response.json();
 
-    const data = typeof parsed.body === "string" ? JSON.parse(parsed.body) : parsed.body;
-
-    if (data.short_url) {
-      resultEl.innerHTML = `Short URL: <a href="${data.short_url}" target="_blank">${data.short_url}</a>`;
-    } else {
-      resultEl.innerText = "Error: short_url not returned by Lambda.";
-    }
-
-  } catch (error) {
-    resultEl.innerText = "Error: " + error.message;
-  }
-}
-  </script>
-
-</body>
+          if (response.ok && data.short_url) {
+            resultElement.innerHTML = `<strong>Short URL:</strong> <a href="${data.short_url}" target="_blank">${data.short_url}</a>`;
+          } else {
+            console.error("Invalid response:", data);
+            resultElement.textContent = "Error: " + (data.message || "Something went wrong.");
+          }
+        } catch (error) {
+          console.error("Fetch error:", error);
+          resultElement.textContent = "Error: " + error.message;
+        }
+      });
+    </script>
+  </body>
 </html>
