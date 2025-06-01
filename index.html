@@ -55,8 +55,8 @@
           const data = await response.json();
           console.log("Response from API:", data);
 
-          // Parse the 'body' string to JSON because of Lambda Proxy Integration
-          const payload = JSON.parse(data.body);
+          // Use data directly since API response is already parsed JSON
+          const payload = data;
 
           if (response.ok && payload.shortUrl) {
             resultElement.innerHTML = `<strong>Short URL:</strong> <a href="${payload.shortUrl}" target="_blank">${payload.shortUrl}</a>`;
