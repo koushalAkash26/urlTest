@@ -35,7 +35,7 @@
     <p id="result"></p>
 
     <script>
-      const apiUrl = "https://cxw6qkn65j.execute-api.us-east-1.amazonaws.com/prod"; // Replace if needed
+      const apiUrl = "https://cxw6qkn65j.execute-api.us-east-1.amazonaws.com/prod"; // Replace with your API Gateway invoke URL
 
       document.getElementById("urlForm").addEventListener("submit", async function (e) {
         e.preventDefault();
@@ -54,10 +54,13 @@
 
           const data = await response.json();
 
-          if (response.ok && data.short_url) {
-            resultElement.innerHTML = `<strong>Short URL:</strong> <a href="${data.short_url}" target="_blank">${data.short_url}</a>`;
+          // Parse the 'body' string to JSON because of Lambda Proxy Integration
+          const payload = JSON.parse(data.body);
+
+          if (response.ok && payload.shortUrl) {
+            resultElement.innerHTML = `<strong>Short URL:</strong> <a href="${payload.shortUrl}" target="_blank">${payload.shortUrl}</a>`;
           } else {
-            console.error("Invalid response structure:", data);
+            console.error("Invalid response structure:", payload);
             resultElement.textContent = "Error: Invalid response from server.";
           }
         } catch (error) {
